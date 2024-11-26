@@ -157,7 +157,7 @@ def get_token_throughput_latencies(
         "mean_output_tokens": mean_output_tokens,
         "stddev_output_tokens": stddev_output_tokens,
         "num_concurrent_requests": num_concurrent_requests,
-        "additional_sampling_params": additional_sampling_params,
+        "additional_sampling_params": additional_sampling_params
     }
 
     metadata["results"] = ret
@@ -229,6 +229,10 @@ def metrics_summary(
         print(f"    stddev = {series.std()}")
         ret[key]["stddev"] = series.std()
 
+    overall_test_time = end_time - start_time
+    print(f"Overall Test Time: {overall_test_time}")
+    ret[common_metrics.OVERALL_TEST_TIME] = overall_test_time
+
     ret[common_metrics.NUM_REQ_STARTED] = len(metrics)
 
     error_codes = df[common_metrics.ERROR_CODE].dropna()
@@ -245,21 +249,18 @@ def metrics_summary(
 
     overall_output_throughput = df_without_errored_req[
         common_metrics.NUM_OUTPUT_TOKENS
-    ].sum() / (end_time - start_time)
+    ].sum() / (overall_test_time)
 
     print(f"Overall Output Throughput: {overall_output_throughput}")
     ret[common_metrics.OUTPUT_THROUGHPUT] = overall_output_throughput
 
     num_completed_requests = len(df_without_errored_req)
-    num_completed_requests_per_min = (
-        num_completed_requests / (end_time - start_time) * 60
-    )
+    num_completed_requests_per_sec = num_completed_requests / overall_test_time
     print(f"Number Of Completed Requests: {num_completed_requests}")
-    print(f"Completed Requests Per Minute: {num_completed_requests_per_min}")
+    print(f"Completed Requests Per Sec: {num_completed_requests_per_sec}")
 
     ret[common_metrics.NUM_COMPLETED_REQUESTS] = num_completed_requests
-    ret[common_metrics.COMPLETED_REQUESTS_PER_MIN] = num_completed_requests_per_min
-    
+    ret[common_metrics.COMPLETED_REQUESTS_PER_SEC] = num_completed_requests_per_sec
     return ret
 
 
@@ -404,7 +405,7 @@ args.add_argument(
 args.add_argument(
     "--max-num-completed-requests",
     type=int,
-    default=10,
+    default=500,
     help=(
         "The number of requests to complete before finishing the test. Note "
         "that its possible for the test to timeout first. (default: %(default)s)"

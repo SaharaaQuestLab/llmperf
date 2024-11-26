@@ -98,6 +98,7 @@ class OpenAIChatCompletionsClient(LLMClient):
                             time_to_next_token.append(
                                 time.monotonic() - most_recent_received_token_time
                             )
+                        # don't think this is accurate, this will be slightly different from calculation above
                         most_recent_received_token_time = time.monotonic()
                         generated_text += delta["content"]
 
