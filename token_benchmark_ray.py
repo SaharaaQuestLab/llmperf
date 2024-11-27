@@ -450,7 +450,7 @@ args.add_argument(
 
 if __name__ == "__main__":
     env_vars = dict(os.environ)
-    ray.init(runtime_env={"env_vars": env_vars}, object_store_memory=1073741824)  # 1 GB
+    ray.init(runtime_env={"env_vars": env_vars}, object_store_memory=78643200)  # 1 GB
     args = args.parse_args()
 
     # Parse user metadata.
