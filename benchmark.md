@@ -120,7 +120,7 @@ python token_benchmark_ray.py \
 --stddev-input-tokens 150 \
 --mean-output-tokens 150 \
 --stddev-output-tokens 10 \
---max-num-completed-requests 500 \
+--max-num-completed-requests 200 \
 --timeout 5000 \
 --num-concurrent-requests 1 \
 --results-dir "result_outputs_h100_80GB_cc_off" \
