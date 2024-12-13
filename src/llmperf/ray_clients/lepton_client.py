@@ -12,8 +12,13 @@ from llmperf import common_metrics
 
 
 @ray.remote
-class OpenAIChatCompletionsClient(LLMClient):
+class LeptonClient(LLMClient):
     """Client for OpenAI Chat Completions API."""
+
+    def __init__(self):
+        self.api_key = os.environ.get('LEPTON_API_TOKEN')
+        if not self.api_key:
+            raise ValueError("the environment variable LEPTON_API_TOKEN must be set.")
 
     def llm_request(self, request_config: RequestConfig) -> Dict[str, Any]:
         prompt = request_config.prompt
@@ -31,6 +36,11 @@ class OpenAIChatCompletionsClient(LLMClient):
         }
         sampling_params = request_config.sampling_params
         body.update(sampling_params or {})
+
+        headers = {}
+        if self.api_key:
+            headers.update({"Authorization": f"Bearer {self.api_key}"})
+                           
         time_to_next_token = []
         tokens_received = 0
         ttft = 0
@@ -59,10 +69,11 @@ class OpenAIChatCompletionsClient(LLMClient):
         if not address.endswith("/"):
             address = address + "/"
         address += "chat/completions"
-
+ 
         try:
             with requests.post(
                 address,
+                headers=headers,
                 json=body,
                 stream=True,
                 timeout=180,
