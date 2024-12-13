@@ -51,7 +51,29 @@ python token_benchmark_ray.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
+--llm-api openai \
+--additional-sampling-params '{}'
+
+```
+
+### Lepton APIs
+```bash
+# Lepton is usually compatible with openai thus set up is similar
+# put your LEPTON_API_TOKEN in here
+export OPENAI_API_KEY=secret_abcdefg
+export OPENAI_API_BASE="https://api.endpoints.anyscale.com/v1"
+
+python token_benchmark_ray.py \
+--model "meta-llama/Llama-2-7b-chat-hf" \
+--mean-input-tokens 550 \
+--stddev-input-tokens 150 \
+--mean-output-tokens 150 \
+--stddev-output-tokens 10 \
+--max-num-completed-requests 2 \
+--timeout 600 \
+--num-concurrent-requests 1 \
+--results-dir "results" \
 --llm-api openai \
 --additional-sampling-params '{}'
 
@@ -70,7 +92,7 @@ python token_benchmark_ray.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 --llm-api anthropic \
 --additional-sampling-params '{}'
 
@@ -90,7 +112,7 @@ python token_benchmark_ray.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 --llm-api "litellm" \
 --additional-sampling-params '{}'
 
@@ -111,7 +133,7 @@ python token_benchmark_ray.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 --llm-api "litellm" \
 --additional-sampling-params '{}'
 
@@ -133,7 +155,7 @@ python token_benchmark_ray.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 --llm-api "litellm" \
 --additional-sampling-params '{}'
 
@@ -166,7 +188,7 @@ python token_benchmark_ray.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 --llm-api "vertexai" \
 --additional-sampling-params '{}'
 
@@ -189,7 +211,28 @@ python llm_correctness.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
+
+```
+
+### Bedrock APIs
+```bash
+# Please configure your aws credentials first
+# Then pass your assumed role
+export AWS_ROLE_ARN=arn:aws:iam::274280642374:role/exec-layer-ec2-role
+
+python token_benchmark_ray.py \
+--model "arn:aws:bedrock:us-east-1:274280642374:imported-model/nkoroisirgbv" \
+--mean-input-tokens 550 \
+--stddev-input-tokens 150 \
+--mean-output-tokens 150 \
+--stddev-output-tokens 10 \
+--timeout 3000 \
+--num-concurrent-requests 1 \
+--max-num-completed-requests 300 \
+--results-dir "results/dolphin-2-5-mixtral-8x7b/bedrock_custom_import/" \
+--llm-api bedrock \
+--additional-sampling-params '{"temperature": 0}'
 
 ```
 
@@ -220,7 +263,7 @@ python llm_correctness.py \
 --max-num-completed-requests 150 \
 --timeout 600 \
 --num-concurrent-requests 10 \
---results-dir "result_outputs"
+--results-dir "results"
 ```
 
 ### Anthropic
@@ -234,7 +277,7 @@ python llm_correctness.py \
 --max-num-completed-requests 5 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs"
+--results-dir "results"
 ```
 
 ### TogetherAI
@@ -248,7 +291,7 @@ python llm_correctness.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 
 ```
 
@@ -264,7 +307,7 @@ python llm_correctness.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 
 ```
 
@@ -281,7 +324,7 @@ python llm_correctness.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 
 ```
 
@@ -313,7 +356,7 @@ python llm_correctness.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 
 ```
 
@@ -334,7 +377,7 @@ python llm_correctness.py \
 --max-num-completed-requests 2 \
 --timeout 600 \
 --num-concurrent-requests 1 \
---results-dir "result_outputs" \
+--results-dir "results" \
 
 ```
 
