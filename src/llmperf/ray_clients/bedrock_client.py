@@ -11,6 +11,41 @@ from llmperf.models import RequestConfig
 from llmperf import common_metrics
 from llmperf.aws_client import AWSSession
 
+
+class BedrockColdStartClient():
+    """Client for OpenAI Chat Completions API."""
+
+    def __init__(self):
+        role_arn = os.environ.get('AWS_ROLE_ARN', '')
+        if not role_arn:
+            raise ValueError("AWS_ROLE_ARN must be set to get access to BedrockClient")
+        self.session = AWSSession(role_arn, "exec-layer-bedrock-session", custom_region_name='us-east-1')
+        self.cold_start = True
+
+    def measure_cold_start(self, prompt, model) -> float:
+        run_time_client = self.session.client("bedrock-runtime")
+
+        message = json.dumps({
+            "prompt": prompt
+        })
+
+        start_time = time.monotonic()
+        # measure cold start
+        while self.cold_start:
+            print("BedrockColdStartClient: measuring cold start ...")
+            try:
+                run_time_client.invoke_model_with_response_stream(
+                    modelId=model,
+                    body=message
+                )
+                self.cold_start = False
+                cold_start_duration = time.monotonic() - start_time
+                print(f"BedrockClient: cold start duration: {cold_start_duration}")
+                return cold_start_duration
+            except run_time_client.exceptions.ModelNotReadyException:
+                print("BedrockColdStartClient: waiting for model to start up and sleep for 60s ...")
+                time.sleep(60)
+
 @ray.remote
 class BedrockClient(LLMClient):
     """Client for OpenAI Chat Completions API."""
@@ -25,7 +60,6 @@ class BedrockClient(LLMClient):
         if not role_arn:
             raise ValueError("AWS_ROLE_ARN must be set to get access to BedrockClient")
         self.session = AWSSession(role_arn, "exec-layer-bedrock-session", custom_region_name='us-east-1')
-        self.cold_start = True
 
     def llm_request(self, request_config: RequestConfig) -> Dict[str, Any]:
         prompt = request_config.prompt
@@ -59,21 +93,6 @@ class BedrockClient(LLMClient):
 
         metrics[common_metrics.ERROR_CODE] = None
         metrics[common_metrics.ERROR_MSG] = ""
-
-        start_time = time.monotonic()
-        # measure cold start
-        while self.cold_start:
-            print("BedrockClient: measuring cold start ...")
-            try:
-                response = run_time_client.invoke_model_with_response_stream(
-                    modelId=model,
-                    body=message
-                )
-                self.cold_start = False
-                cold_start_duration = time.monotonic() - start_time
-                print(f"BedrockClient: cold start duration: {cold_start_duration}")
-            except run_time_client.exceptions.ModelNotReadyException:
-                time.sleep(60)
 
         start_time = time.monotonic()
         most_recent_received_token_time = time.monotonic()

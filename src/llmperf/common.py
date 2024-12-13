@@ -4,13 +4,21 @@ from llmperf.ray_clients.openai_chat_completions_client import (
     OpenAIChatCompletionsClient,
 )
 from llmperf.ray_clients.sagemaker_client import SageMakerClient
-from llmperf.ray_clients.bedrock_client import BedrockClient
+from llmperf.ray_clients.bedrock_client import BedrockClient, BedrockColdStartClient
 from llmperf.ray_clients.vertexai_client import VertexAIClient
-from llmperf.ray_llm_client import LLMClient
+from llmperf.ray_llm_client import LLMClient, ColdStartClient
 
 
-SUPPORTED_APIS = ["openai", "anthropic", "litellm"]
+SUPPORTED_APIS = ["openai", "anthropic", "litellm", "bedrock"]
 
+def construct_cold_start_client(llm_api: str) -> ColdStartClient:
+    if llm_api == "bedrock":
+        client = BedrockColdStartClient()
+    else:
+        raise ValueError(
+            f"llm_api must be one of the supported LLM APIs: {SUPPORTED_APIS}"
+        ) 
+    return client       
 
 def construct_clients(llm_api: str, num_clients: int) -> List[LLMClient]:
     """Construct LLMClients that will be used to make requests to the LLM API.

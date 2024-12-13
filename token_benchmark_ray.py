@@ -12,7 +12,7 @@ import pandas as pd
 import ray
 
 from llmperf import common_metrics
-from llmperf.common import SUPPORTED_APIS, construct_clients
+from llmperf.common import SUPPORTED_APIS, construct_clients, construct_cold_start_client
 
 from llmperf.models import RequestConfig
 from llmperf.requests_launcher import RequestsLauncher
@@ -67,6 +67,12 @@ def get_token_throughput_latencies(
     if not additional_sampling_params:
         additional_sampling_params = {}
 
+
+    # handling cold start 
+    if llm_api in ['bedrock']:
+        cold_start_client = construct_cold_start_client(llm_api=llm_api)
+        cold_start_client.measure_cold_start('random query', model)
+    
     clients = construct_clients(llm_api=llm_api, num_clients=num_concurrent_requests)
     req_launcher = RequestsLauncher(clients)
     completed_requests = []
