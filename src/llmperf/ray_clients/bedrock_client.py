@@ -13,12 +13,12 @@ from llmperf.aws_client import AWSSession
 
 
 class BedrockColdStartClient():
-    """Client for OpenAI Chat Completions API."""
+    """Client for handling cold start for Bedrock."""
 
     def __init__(self):
         role_arn = os.environ.get('AWS_ROLE_ARN', '')
         if not role_arn:
-            raise ValueError("AWS_ROLE_ARN must be set to get access to BedrockClient")
+            raise ValueError("AWS_ROLE_ARN must be set to get access to BedrockColdStartClient")
         self.session = AWSSession(role_arn, "exec-layer-bedrock-session", custom_region_name='us-east-1')
         self.cold_start = True
 

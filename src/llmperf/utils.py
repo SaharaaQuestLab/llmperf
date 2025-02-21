@@ -89,7 +89,7 @@ def randomly_sample_sonnet_lines_prompt(
         f"with {expect_output_tokens} output tokens. "
         "Don't generate eos tokens:\n\n"
     )
-    # get a prompt length that is at least as long as the base
+    # get a prompt length that is at least as long as the base prompt defined above
     num_prompt_tokens = sample_random_positive_int(
         prompt_tokens_mean, prompt_tokens_stddev
     )
@@ -97,11 +97,13 @@ def randomly_sample_sonnet_lines_prompt(
         num_prompt_tokens = sample_random_positive_int(
             prompt_tokens_mean, prompt_tokens_stddev
         )
+
     remaining_prompt_tokens = num_prompt_tokens - get_token_length(prompt)
     sonnet_path = pathlib.Path(__file__).parent.resolve() / "sonnet.txt"
     with open(sonnet_path, "r") as f:
         sonnet_lines = f.readlines()
     random.shuffle(sonnet_lines)
+    
     sampling_lines = True
     while sampling_lines:
         for line in sonnet_lines:

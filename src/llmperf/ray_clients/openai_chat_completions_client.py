@@ -31,6 +31,8 @@ class OpenAIChatCompletionsClient(LLMClient):
         }
         sampling_params = request_config.sampling_params
         body.update(sampling_params or {})
+
+        # Initialize metrics
         time_to_next_token = []
         tokens_received = 0
         ttft = 0
@@ -41,7 +43,6 @@ class OpenAIChatCompletionsClient(LLMClient):
         total_request_time = 0
 
         metrics = {}
-
         metrics[common_metrics.ERROR_CODE] = None
         metrics[common_metrics.ERROR_MSG] = ""
 
@@ -52,12 +53,16 @@ class OpenAIChatCompletionsClient(LLMClient):
             raise ValueError("the environment variable OPENAI_API_BASE must be set.")
         
         api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("the environment variable OPENAI_API_KEY must be set.")
+        
         headers = {}
         if api_key:
             headers.update({"Authorization": f"Bearer {api_key}"})
         
-        if not address:
-            raise ValueError("No host provided.")
+        # add additional headers
+        headers.update(request_config.additional_headers or {})
+
         if not address.endswith("/"):
             address = address + "/"
         address += "chat/completions"
@@ -74,6 +79,7 @@ class OpenAIChatCompletionsClient(LLMClient):
                     error_msg = response.text
                     error_response_code = response.status_code
                     response.raise_for_status()
+                
                 for chunk in response.iter_lines(chunk_size=None):
                     chunk = chunk.strip()
 
@@ -83,6 +89,7 @@ class OpenAIChatCompletionsClient(LLMClient):
                     chunk = chunk[len(stem) :]
                     if chunk == b"[DONE]":
                         continue
+
                     tokens_received += 1
                     data = json.loads(chunk)
 
@@ -93,15 +100,15 @@ class OpenAIChatCompletionsClient(LLMClient):
                         
                     delta = data["choices"][0]["delta"]
                     if delta.get("content", None):
+                        current_time = time.monotonic()
                         if not ttft:
-                            ttft = time.monotonic() - start_time
+                            ttft = current_time - start_time
                             time_to_next_token.append(ttft)
                         else:
                             time_to_next_token.append(
-                                time.monotonic() - most_recent_received_token_time
+                                current_time - most_recent_received_token_time
                             )
-                        # don't think this is accurate, this will be slightly different from calculation above
-                        most_recent_received_token_time = time.monotonic()
+                        most_recent_received_token_time = current_time
                         generated_text += delta["content"]
 
             total_request_time = time.monotonic() - start_time
@@ -113,7 +120,7 @@ class OpenAIChatCompletionsClient(LLMClient):
             print(f"Warning Or Error: {e}")
             print(error_response_code)
 
-        metrics[common_metrics.INTER_TOKEN_LAT] = sum(time_to_next_token) #This should be same as metrics[common_metrics.E2E_LAT]. Leave it here for now
+        metrics[common_metrics.INTER_TOKEN_LAT] = sum(time_to_next_token) #This should be roughly same as metrics[common_metrics.E2E_LAT]. Leave it here for now
         metrics[common_metrics.TTFT] = ttft
         metrics[common_metrics.E2E_LAT] = total_request_time
         metrics[common_metrics.REQ_OUTPUT_THROUGHPUT] = output_throughput
