@@ -89,14 +89,12 @@ def randomly_sample_sonnet_lines_prompt(
         with open(system_prompt_file, "r", encoding="utf-8") as file:
             prompt = file.read()
         prompt = prompt.replace("{expect_output_tokens}", str(expect_output_tokens))
-
     else:
         prompt = (
             "Randomly stream lines from the following text "
             f"with {expect_output_tokens} output tokens. "
             "Don't generate eos tokens:\n\n"
         )
-    print(f"Current system prompt: {prompt}")
 
     # get a prompt length that is at least as long as the base prompt defined above
     num_prompt_tokens = sample_random_positive_int(

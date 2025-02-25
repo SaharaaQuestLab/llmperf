@@ -82,7 +82,6 @@ class OpenAIChatCompletionsClient(LLMClient):
                 
                 for chunk in response.iter_lines(chunk_size=None):
                     chunk = chunk.strip()
-
                     if not chunk:
                         continue
                     stem = "data: "
@@ -98,7 +97,11 @@ class OpenAIChatCompletionsClient(LLMClient):
                         error_response_code = data["error"]["code"]
                         raise RuntimeError(data["error"]["message"])
                         
-                    delta = data["choices"][0]["delta"]
+                    choices = data["choices"]
+                    if not choices:
+                        continue
+                    delta = choices[0]["delta"]
+
                     if delta.get("content", None):
                         current_time = time.monotonic()
                         if not ttft:
@@ -110,7 +113,6 @@ class OpenAIChatCompletionsClient(LLMClient):
                             )
                         most_recent_received_token_time = current_time
                         generated_text += delta["content"]
-
             total_request_time = time.monotonic() - start_time
             output_throughput = tokens_received / total_request_time
 
