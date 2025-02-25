@@ -4,7 +4,7 @@ import pathlib
 import random
 import subprocess
 import time
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from transformers import LlamaTokenizerFast
 
@@ -61,7 +61,8 @@ def randomly_sample_sonnet_lines_prompt(
     prompt_tokens_stddev: int = 250,
     expect_output_tokens: int = 150,
     tokenizer = LlamaTokenizerFast.from_pretrained(
-        "hf-internal-testing/llama-tokenizer")
+        "hf-internal-testing/llama-tokenizer"),
+    system_prompt_file: Optional[str] = None
 ) -> Tuple[str, int]:
     """Generate a prompt that randomly samples lines from a the shakespeare sonnet at sonnet.txt.
 
@@ -71,7 +72,7 @@ def randomly_sample_sonnet_lines_prompt(
         expect_output_tokens: The number of tokens to expect in the output. This is used to
         determine the length of the prompt. The prompt will be generated such that the output
         will be approximately this many tokens.
-
+        system_prompt_file: The path to the system prompt file to use for the benchmark.
     Note:
         tokens will be counted from the sonnet using the Llama tokenizer. Using one tokenizer
         ensures a fairer comparison across different LLMs. For example, if gpt 3.5 tokenizes
@@ -84,11 +85,19 @@ def randomly_sample_sonnet_lines_prompt(
 
     get_token_length = lambda text: len(tokenizer.encode(text))
 
-    prompt = (
-        "Randomly stream lines from the following text "
-        f"with {expect_output_tokens} output tokens. "
-        "Don't generate eos tokens:\n\n"
-    )
+    if system_prompt_file:
+        with open(system_prompt_file, "r", encoding="utf-8") as file:
+            prompt = file.read()
+        prompt = prompt.replace("{expect_output_tokens}", str(expect_output_tokens))
+
+    else:
+        prompt = (
+            "Randomly stream lines from the following text "
+            f"with {expect_output_tokens} output tokens. "
+            "Don't generate eos tokens:\n\n"
+        )
+    print(f"Current system prompt: {prompt}")
+
     # get a prompt length that is at least as long as the base prompt defined above
     num_prompt_tokens = sample_random_positive_int(
         prompt_tokens_mean, prompt_tokens_stddev
@@ -103,7 +112,7 @@ def randomly_sample_sonnet_lines_prompt(
     with open(sonnet_path, "r") as f:
         sonnet_lines = f.readlines()
     random.shuffle(sonnet_lines)
-    
+
     sampling_lines = True
     while sampling_lines:
         for line in sonnet_lines:

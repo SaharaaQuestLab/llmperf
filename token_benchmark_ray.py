@@ -36,7 +36,8 @@ def get_token_throughput_latencies(
     max_num_completed_requests: int = 500,
     test_timeout_s=90,
     llm_api="openai",
-    additional_headers: Optional[Dict[str, Any]] = None
+    additional_headers: Optional[Dict[str, Any]] = None,
+    system_prompt_file: Optional[str] = None
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Get the token throughput and latencies for the given model.
 
@@ -53,6 +54,7 @@ def get_token_throughput_latencies(
         test_timeout_s: The amount of time to run the test for before reporting results.
         llm_api: The name of the llm api to use. Either "openai" or "litellm".
         additional_headers: Additional headers to send with the request.
+        system_prompt_file: The path to the system prompt file to use for the benchmark.
     Returns:
         A summary of the performance metrics collected across all completed requests
         (e.g. throughput, latencies, etc.)
@@ -97,7 +99,8 @@ def get_token_throughput_latencies(
             prompt_tokens_mean=mean_input_tokens,
             prompt_tokens_stddev=stddev_input_tokens,
             expect_output_tokens=num_output_tokens,
-            tokenizer=tokenizer
+            tokenizer=tokenizer,
+            system_prompt_file=system_prompt_file
         ))
     
     start_time = time.monotonic()
@@ -296,6 +299,7 @@ def run_token_benchmark(
     results_dir: str,
     user_metadata: Dict[str, Any],
     additional_headers: Dict[str, Any],
+    system_prompt_file: str
 ):
     """
     Args:
@@ -315,10 +319,10 @@ def run_token_benchmark(
         user_metadata: Additional metadata to include in the results.
         additional_headers: Additional headers to send with the request.
     """
-    if mean_input_tokens < 40:
+    if not system_prompt_file and mean_input_tokens < 40:
         print(
             "the minimum number of input tokens that will be sent is 41"
-            " because of the prompting logic right now"
+            " because of default system prompt defined in code contains 41 tokens"
         )
 
     summary, individual_responses = get_token_throughput_latencies(
@@ -333,6 +337,7 @@ def run_token_benchmark(
         num_concurrent_requests=num_concurrent_requests,
         additional_sampling_params=json.loads(additional_sampling_params),
         additional_headers=additional_headers,
+        system_prompt_file=system_prompt_file
     )
 
     if results_dir:
@@ -477,6 +482,14 @@ args.add_argument(
         "header1=foo,header2=1. This is not used in llmp requests directly to the model "
     ),
 )
+args.add_argument(
+    "--system-prompt-file",
+    type=str,
+    default="",
+    help=(
+        "System prompt file to use for the benchmark. "
+    ),
+)
 
 if __name__ == "__main__":
     env_vars = dict(os.environ)
@@ -511,4 +524,5 @@ if __name__ == "__main__":
         results_dir=args.results_dir,
         user_metadata=user_metadata,
         additional_headers=additional_headers,
+        system_prompt_file=args.system_prompt_file,
     )
