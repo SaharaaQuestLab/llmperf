@@ -113,14 +113,14 @@ class OpenAIChatCompletionsClient(LLMClient):
                             )
                         most_recent_received_token_time = current_time
                         generated_text += delta["content"]
-            total_request_time = time.monotonic() - start_time
-            output_throughput = tokens_received / total_request_time
-
         except Exception as e:
             metrics[common_metrics.ERROR_MSG] = error_msg
             metrics[common_metrics.ERROR_CODE] = error_response_code
             print(f"Warning Or Error: {e}")
             print(error_response_code)
+        finally:
+            total_request_time = time.monotonic() - start_time
+            output_throughput = tokens_received / total_request_time
 
         metrics[common_metrics.INTER_TOKEN_LAT] = sum(time_to_next_token) #This should be roughly same as metrics[common_metrics.E2E_LAT]. Leave it here for now
         metrics[common_metrics.TTFT] = ttft

@@ -94,7 +94,6 @@ def get_token_throughput_latencies(
             mean_output_tokens, stddev_output_tokens
         ))
         num_output_tokens_list.append(num_output_tokens)
-
         prompts.append(randomly_sample_sonnet_lines_prompt(
             prompt_tokens_mean=mean_input_tokens,
             prompt_tokens_stddev=stddev_input_tokens,
@@ -111,17 +110,17 @@ def get_token_throughput_latencies(
         and len(completed_requests) < max_num_completed_requests # check if the max number of completed requests has been reached
     ):
         iter += 1
-
-        default_sampling_params = {"max_tokens": num_output_tokens_list.pop()}
-        default_sampling_params.update(additional_sampling_params)
-        request_config = RequestConfig(
-            model=model,
-            prompt=prompts.pop(),
-            sampling_params=default_sampling_params,
-            llm_api=llm_api,
-            additional_headers=additional_headers
-        )
-        req_launcher.launch_requests(request_config)
+        if iter <= max_num_completed_requests:
+            default_sampling_params = {"max_tokens": num_output_tokens_list.pop()}
+            default_sampling_params.update(additional_sampling_params)
+            request_config = RequestConfig(
+                model=model,
+                prompt=prompts.pop(),
+                sampling_params=default_sampling_params,
+                llm_api=llm_api,
+                additional_headers=additional_headers
+            )
+            req_launcher.launch_requests(request_config)
 
         # Only retrieve results every num_concurrent_requests iterations
         # This essentially simulates concurrent requests because of no waiting between requests
