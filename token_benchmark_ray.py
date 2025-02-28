@@ -37,7 +37,8 @@ def get_token_throughput_latencies(
     test_timeout_s=90,
     llm_api="openai",
     additional_headers: Optional[Dict[str, Any]] = None,
-    system_prompt_file: Optional[str] = None
+    system_prompt_file: Optional[str] = None,
+    request_timeout: int = 180
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Get the token throughput and latencies for the given model.
 
@@ -55,6 +56,7 @@ def get_token_throughput_latencies(
         llm_api: The name of the llm api to use. Either "openai" or "litellm".
         additional_headers: Additional headers to send with the request.
         system_prompt_file: The path to the system prompt file to use for the benchmark.
+        request_timeout: The time out for each request to the llm api, default is 180 seconds.
     Returns:
         A summary of the performance metrics collected across all completed requests
         (e.g. throughput, latencies, etc.)
@@ -118,7 +120,8 @@ def get_token_throughput_latencies(
                 prompt=prompts.pop(),
                 sampling_params=default_sampling_params,
                 llm_api=llm_api,
-                additional_headers=additional_headers
+                additional_headers=additional_headers,
+                request_timeout=request_timeout
             )
             req_launcher.launch_requests(request_config)
 
@@ -298,7 +301,8 @@ def run_token_benchmark(
     results_dir: str,
     user_metadata: Dict[str, Any],
     additional_headers: Dict[str, Any],
-    system_prompt_file: str
+    system_prompt_file: str,
+    request_timeout: int
 ):
     """
     Args:
@@ -317,6 +321,8 @@ def run_token_benchmark(
         results_dir: The directory to save the results to.
         user_metadata: Additional metadata to include in the results.
         additional_headers: Additional headers to send with the request.
+        system_prompt_file: The path to the system prompt file to use for the benchmark.
+        request_timeout: The time out for each request to the llm api, default is 180 seconds.
     """
     if not system_prompt_file and mean_input_tokens < 40:
         print(
@@ -336,7 +342,8 @@ def run_token_benchmark(
         num_concurrent_requests=num_concurrent_requests,
         additional_sampling_params=json.loads(additional_sampling_params),
         additional_headers=additional_headers,
-        system_prompt_file=system_prompt_file
+        system_prompt_file=system_prompt_file,
+        request_timeout=request_timeout
     )
 
     if results_dir:
@@ -489,7 +496,14 @@ args.add_argument(
         "System prompt file to use for the benchmark. "
     ),
 )
-
+args.add_argument(
+    "--request-timeout",
+    type=int,
+    default=180,
+    help=(
+        "Time out for each request to the llm api. "
+    ),
+)
 if __name__ == "__main__":
     env_vars = dict(os.environ)
     ray.init(runtime_env={"env_vars": env_vars}, object_store_memory=78643200)  # 1 GB
@@ -524,4 +538,5 @@ if __name__ == "__main__":
         user_metadata=user_metadata,
         additional_headers=additional_headers,
         system_prompt_file=args.system_prompt_file,
+        request_timeout=args.request_timeout
     )

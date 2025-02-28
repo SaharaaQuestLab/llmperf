@@ -72,7 +72,7 @@ class OpenAIChatCompletionsClient(LLMClient):
                 address,
                 json=body,
                 stream=True,
-                timeout=3000,
+                timeout=request_config.request_timeout,
                 headers=headers,
             ) as response:
                 if response.status_code != 200:
