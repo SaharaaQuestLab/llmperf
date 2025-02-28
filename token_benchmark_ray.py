@@ -36,6 +36,9 @@ def get_token_throughput_latencies(
     max_num_completed_requests: int = 500,
     test_timeout_s=90,
     llm_api="openai",
+    additional_headers: Optional[Dict[str, Any]] = None,
+    system_prompt_file: Optional[str] = None,
+    request_timeout: int = 180
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Get the token throughput and latencies for the given model.
 
@@ -51,7 +54,9 @@ def get_token_throughput_latencies(
             this to increase the amount of load and vice versa.
         test_timeout_s: The amount of time to run the test for before reporting results.
         llm_api: The name of the llm api to use. Either "openai" or "litellm".
-
+        additional_headers: Additional headers to send with the request.
+        system_prompt_file: The path to the system prompt file to use for the benchmark.
+        request_timeout: The time out for each request to the llm api, default is 180 seconds.
     Returns:
         A summary of the performance metrics collected across all completed requests
         (e.g. throughput, latencies, etc.)
@@ -67,57 +72,67 @@ def get_token_throughput_latencies(
     if not additional_sampling_params:
         additional_sampling_params = {}
 
+    if not additional_headers:
+        additional_headers = {}
 
     # handling cold start 
     if llm_api in ['bedrock']:
         cold_start_client = construct_cold_start_client(llm_api=llm_api)
         cold_start_client.measure_cold_start('random query', model)
     
+    # initializing ray clients
     clients = construct_clients(llm_api=llm_api, num_clients=num_concurrent_requests)
     req_launcher = RequestsLauncher(clients)
+
     completed_requests = []
     num_completed_requests = 0
-    # make up prompts outside of send loop for faster benchmarking loop
+    # number of output tokens for each request
     num_output_tokens_list = []
+
+    # make up prompts outside of send loop for faster benchmarking loop
     prompts = []
     for i in range(max_num_completed_requests):
         num_output_tokens = (sample_random_positive_int(
             mean_output_tokens, stddev_output_tokens
         ))
         num_output_tokens_list.append(num_output_tokens)
-
         prompts.append(randomly_sample_sonnet_lines_prompt(
             prompt_tokens_mean=mean_input_tokens,
             prompt_tokens_stddev=stddev_input_tokens,
             expect_output_tokens=num_output_tokens,
-            tokenizer=tokenizer
+            tokenizer=tokenizer,
+            system_prompt_file=system_prompt_file
         ))
+    
     start_time = time.monotonic()
     iter = 0
     pbar = tqdm(total=max_num_completed_requests)
     while (
-        time.monotonic() - start_time < test_timeout_s
-        and len(completed_requests) < max_num_completed_requests
+        time.monotonic() - start_time < test_timeout_s # check if the test has timed out
+        and len(completed_requests) < max_num_completed_requests # check if the max number of completed requests has been reached
     ):
         iter += 1
+        if iter <= max_num_completed_requests:
+            default_sampling_params = {"max_tokens": num_output_tokens_list.pop()}
+            default_sampling_params.update(additional_sampling_params)
+            request_config = RequestConfig(
+                model=model,
+                prompt=prompts.pop(),
+                sampling_params=default_sampling_params,
+                llm_api=llm_api,
+                additional_headers=additional_headers,
+                request_timeout=request_timeout
+            )
+            req_launcher.launch_requests(request_config)
 
-        default_sampling_params = {"max_tokens": num_output_tokens_list.pop()}
-        default_sampling_params.update(additional_sampling_params)
-        request_config = RequestConfig(
-            model=model,
-            prompt=prompts.pop(),
-            sampling_params=default_sampling_params,
-            llm_api=llm_api,
-        )
-        req_launcher.launch_requests(request_config)
-        # Retrieving results less frequently allows for more concurrent requests
-        # to be launched. This will overall reduce the amount of time it takes
-        # for the test to run.
+        # Only retrieve results every num_concurrent_requests iterations
+        # This essentially simulates concurrent requests because of no waiting between requests
         if not (iter % num_concurrent_requests):
             outs = req_launcher.get_next_ready()
             all_metrics = []
             for out in outs:
-                request_metrics, gen_text, _ = out
+                request_metrics, gen_text, _request_config = out
+                # using tokenizer to calculate accurate number of output tokens
                 num_output_tokens = get_token_length(gen_text)
                 if num_output_tokens: 
                     request_metrics[common_metrics.INTER_TOKEN_LAT] /= num_output_tokens
@@ -127,6 +142,7 @@ def get_token_throughput_latencies(
                 request_metrics[common_metrics.NUM_TOTAL_TOKENS] = request_metrics[common_metrics.NUM_INPUT_TOKENS] + num_output_tokens
                 request_metrics[common_metrics.REQ_OUTPUT_THROUGHPUT] = num_output_tokens / request_metrics[common_metrics.E2E_LAT]
                 all_metrics.append(request_metrics)
+            # add collected metrics to the list of completed requests
             completed_requests.extend(all_metrics)
         pbar.update(len(completed_requests) - num_completed_requests)
         num_completed_requests = len(completed_requests)
@@ -140,7 +156,8 @@ def get_token_throughput_latencies(
     outs = req_launcher.get_next_ready()
     all_metrics = []
     for out in outs:
-        request_metrics, gen_text, _ = out
+        request_metrics, gen_text, _request_config = out
+        # using tokenizer to calculate accurate number of output tokens
         num_output_tokens = get_token_length(gen_text)
         if num_output_tokens: 
             request_metrics[common_metrics.INTER_TOKEN_LAT] /= num_output_tokens
@@ -149,8 +166,8 @@ def get_token_throughput_latencies(
         request_metrics[common_metrics.NUM_OUTPUT_TOKENS] = num_output_tokens
         request_metrics[common_metrics.NUM_TOTAL_TOKENS] = request_metrics[common_metrics.NUM_INPUT_TOKENS] + num_output_tokens
         request_metrics[common_metrics.REQ_OUTPUT_THROUGHPUT] = num_output_tokens / request_metrics[common_metrics.E2E_LAT]
-                
         all_metrics.append(request_metrics)
+    # add collected metrics to the list of completed requests
     completed_requests.extend(all_metrics)
 
     print(f"\Results for token benchmark for {model} queried with the {llm_api} api.\n")
@@ -283,6 +300,9 @@ def run_token_benchmark(
     additional_sampling_params: str,
     results_dir: str,
     user_metadata: Dict[str, Any],
+    additional_headers: Dict[str, Any],
+    system_prompt_file: str,
+    request_timeout: int
 ):
     """
     Args:
@@ -300,11 +320,14 @@ def run_token_benchmark(
             For more information see the LLM APIs documentation for the completions.
         results_dir: The directory to save the results to.
         user_metadata: Additional metadata to include in the results.
+        additional_headers: Additional headers to send with the request.
+        system_prompt_file: The path to the system prompt file to use for the benchmark.
+        request_timeout: The time out for each request to the llm api, default is 180 seconds.
     """
-    if mean_input_tokens < 40:
+    if not system_prompt_file and mean_input_tokens < 40:
         print(
             "the minimum number of input tokens that will be sent is 41"
-            " because of the prompting logic right now"
+            " because of default system prompt defined in code contains 41 tokens"
         )
 
     summary, individual_responses = get_token_throughput_latencies(
@@ -318,6 +341,9 @@ def run_token_benchmark(
         stddev_output_tokens=stddev_output_tokens,
         num_concurrent_requests=num_concurrent_requests,
         additional_sampling_params=json.loads(additional_sampling_params),
+        additional_headers=additional_headers,
+        system_prompt_file=system_prompt_file,
+        request_timeout=request_timeout
     )
 
     if results_dir:
@@ -453,7 +479,31 @@ args.add_argument(
         "name=foo,bar=1. These will be added to the metadata field of the results. "
     ),
 )
-
+args.add_argument(
+    "--header",
+    type=str,
+    default="",
+    help=(
+        "A comma separated list of additional headers to send with the llm request, e.g. "
+        "header1=foo,header2=1. This is not used in llmp requests directly to the model "
+    ),
+)
+args.add_argument(
+    "--system-prompt-file",
+    type=str,
+    default="",
+    help=(
+        "System prompt file to use for the benchmark. "
+    ),
+)
+args.add_argument(
+    "--request-timeout",
+    type=int,
+    default=180,
+    help=(
+        "Time out for each request to the llm api. "
+    ),
+)
 if __name__ == "__main__":
     env_vars = dict(os.environ)
     ray.init(runtime_env={"env_vars": env_vars}, object_store_memory=78643200)  # 1 GB
@@ -465,6 +515,13 @@ if __name__ == "__main__":
         for item in args.metadata.split(","):
             key, value = item.split("=")
             user_metadata[key] = value
+
+    # Parse additional headers.
+    additional_headers = {}
+    if args.header:
+        for item in args.header.split(","):
+            key, value = item.split("=")
+            additional_headers[key] = value
 
     run_token_benchmark(
         llm_api=args.llm_api,
@@ -479,4 +536,7 @@ if __name__ == "__main__":
         additional_sampling_params=args.additional_sampling_params,
         results_dir=args.results_dir,
         user_metadata=user_metadata,
+        additional_headers=additional_headers,
+        system_prompt_file=args.system_prompt_file,
+        request_timeout=args.request_timeout
     )

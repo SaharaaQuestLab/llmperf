@@ -37,6 +37,11 @@ To run the most basic load test you can the token_benchmark_ray script.
 - The results may vary with the load.
 - The results may not correlate with users’ workloads.
 
+### Additional Notes
+- --header to pass additional headers to the LLM API.
+- --request-timeout to pass a request timeout to the LLM API.
+- --system-prompt-file to pass a system prompt file to the LLM API.
+
 ### OpenAI Compatible APIs
 ```bash
 export OPENAI_API_KEY=secret_abcdefg
@@ -57,9 +62,9 @@ python token_benchmark_ray.py \
 
 ```
 
-### Lepton APIs
+### Lepton APIs/Together APIs
 ```bash
-# Lepton is usually compatible with openai thus set up is similar
+# Lepton/Together AI is usually compatible with openai thus set up is similar
 # put your LEPTON_API_TOKEN in here
 export OPENAI_API_KEY=secret_abcdefg
 export OPENAI_API_BASE="https://api.endpoints.anyscale.com/v1"
@@ -94,26 +99,6 @@ python token_benchmark_ray.py \
 --num-concurrent-requests 1 \
 --results-dir "results" \
 --llm-api anthropic \
---additional-sampling-params '{}'
-
-```
-
-### TogetherAI
-
-```bash
-export TOGETHERAI_API_KEY="YOUR_TOGETHER_KEY"
-
-python token_benchmark_ray.py \
---model "together_ai/togethercomputer/CodeLlama-7b-Instruct" \
---mean-input-tokens 550 \
---stddev-input-tokens 150 \
---mean-output-tokens 150 \
---stddev-output-tokens 10 \
---max-num-completed-requests 2 \
---timeout 600 \
---num-concurrent-requests 1 \
---results-dir "results" \
---llm-api "litellm" \
 --additional-sampling-params '{}'
 
 ```
@@ -280,20 +265,6 @@ python llm_correctness.py \
 --results-dir "results"
 ```
 
-### TogetherAI
-
-```bash
-export TOGETHERAI_API_KEY="YOUR_TOGETHER_KEY"
-
-python llm_correctness.py \
---model "together_ai/togethercomputer/CodeLlama-7b-Instruct" \
---llm-api "litellm" \
---max-num-completed-requests 2 \
---timeout 600 \
---num-concurrent-requests 1 \
---results-dir "results" \
-
-```
 
 ### Hugging Face
 
