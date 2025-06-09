@@ -495,8 +495,8 @@ if __name__ == "__main__":
             # "meta-llama/Llama-3.3-70B-Instruct-Turbo",
             # "mistralai/Mistral-7B-Instruct-v0.2",
             # "Qwen/QwQ-32B-Preview",
-            # "google/gemma-2-27b-it",
-            "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            "google/gemma-2-27b-it",
+            # "mistralai/Mixtral-8x7B-Instruct-v0.1",
         ]
     }
     for provider, api_models in models.items():

@@ -49,13 +49,15 @@ class OpenAIChatCompletionsClient(LLMClient):
         most_recent_received_token_time = time.monotonic()
         # address = os.environ.get("OPENAI_API_BASE")
         # address = "https://dev.portal.saharaa.info/api/compute/"
+        # key = "1c6eb8a4-a959-4039-acd7-45cf5e3c13dc"
+
         # address = "http://34.27.237.32:9163/models"
         address = "http://exec-layer-staging.saharaa.info:9163/models/"
+        key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWhhcmFhaSIsImV4cCI6MTc2MDIzNzAzNi4wNTMzMTA5LCJpYXQiOjE3NDQ2ODUwMzYuMDUzMzEyLCJpc3MiOiJzYWhhcmFhaSIsImF1ZCI6InNhaGFyYWFpIn0.OKRAFwIHaCFcZnOPhucQQO1LsOQ_3pne_tZuKP8K4ao"
+
         if not address:
             raise ValueError("the environment variable OPENAI_API_BASE must be set.")
         # key = os.environ.get("OPENAI_API_KEY")
-        key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWhhcmFhaSIsImV4cCI6MTc2MDIzNzAzNi4wNTMzMTA5LCJpYXQiOjE3NDQ2ODUwMzYuMDUzMzEyLCJpc3MiOiJzYWhhcmFhaSIsImF1ZCI6InNhaGFyYWFpIn0.OKRAFwIHaCFcZnOPhucQQO1LsOQ_3pne_tZuKP8K4ao"
-        # key = "1c6eb8a4-a959-4039-acd7-45cf5e3c13dc"
         if not key:
             raise ValueError("the environment variable OPENAI_API_KEY must be set.")
         headers = {"Authorization": f"Bearer {key}",
@@ -90,7 +92,6 @@ class OpenAIChatCompletionsClient(LLMClient):
                         continue
                     tokens_received += 1
                     data = json.loads(chunk)
-                    print(data)
 
                     if "error" in data:
                         error_msg = data["error"]["message"]
