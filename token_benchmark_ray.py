@@ -37,6 +37,7 @@ def get_token_throughput_latencies(
     max_num_completed_requests: int = 500,
     test_timeout_s=90,
     llm_api="openai",
+    provider="together"
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Get the token throughput and latencies for the given model.
 
@@ -107,6 +108,7 @@ def get_token_throughput_latencies(
                 prompt=prompts[request_index],
                 sampling_params=default_sampling_params,
                 llm_api=llm_api,
+                provider=provider
             )
             req_launcher.launch_requests(request_config)
 
@@ -292,6 +294,7 @@ def run_token_benchmark(
     additional_sampling_params: str,
     results_dir: str,
     user_metadata: Dict[str, Any],
+    provider: str="together"
 ):
     """
     Args:
@@ -327,13 +330,15 @@ def run_token_benchmark(
         stddev_output_tokens=stddev_output_tokens,
         num_concurrent_requests=num_concurrent_requests,
         additional_sampling_params=json.loads(additional_sampling_params),
+        provider=provider
     )
 
     if results_dir:
-        filename = f"{model}_{mean_input_tokens}_{mean_output_tokens}"
+        filename = f"{provider}_{model}_{mean_input_tokens}_{mean_output_tokens}"
         filename = re.sub(r"[^\w\d-]+", "-", filename)
         filename = re.sub(r"-{2,}", "-", filename)
         summary_filename = f"{filename}_summary"
+        all_provider_model_performance = "all_model"
         individual_responses_filename = f"{filename}_individual_responses"
 
         # Update to metadata.
@@ -356,9 +361,13 @@ def run_token_benchmark(
         try:
             with open(results_dir / f"{individual_responses_filename}.json", "w") as f:
                 json.dump(individual_responses, f, indent=4)
+            
+            with open(results_dir / f"{all_provider_model_performance}.csv", "a") as f2: #
+                f2.write(f"{provider},{model},{summary['results'][common_metrics.REQ_OUTPUT_THROUGHPUT]['quantiles']['p99']}, {summary['results'][common_metrics.TTFT]['quantiles']['p99']} \n")
+                f2.flush()
         except Exception as e:
             print(individual_responses)
-            raise e
+            # raise e      
 
 
 args = argparse.ArgumentParser(
@@ -475,17 +484,35 @@ if __name__ == "__main__":
             key, value = item.split("=")
             user_metadata[key] = value
 
-    run_token_benchmark(
-        llm_api=args.llm_api,
-        model=args.model,
-        test_timeout_s=args.timeout,
-        max_num_completed_requests=args.max_num_completed_requests,
-        mean_input_tokens=args.mean_input_tokens,
-        stddev_input_tokens=args.stddev_input_tokens,
-        mean_output_tokens=args.mean_output_tokens,
-        stddev_output_tokens=args.stddev_output_tokens,
-        num_concurrent_requests=args.num_concurrent_requests,
-        additional_sampling_params=args.additional_sampling_params,
-        results_dir=args.results_dir,
-        user_metadata=user_metadata,
-    )
+    models = {
+        # "openai": ["gpt-4o"],
+        "together": [
+            # "Qwen/Qwen2.5-72B-Instruct-Turbo",
+            # "deepseek-ai/DeepSeek-V3",
+            # "deepseek-ai/DeepSeek-R1",
+            # "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+            # "Qwen/Qwen2.5-7B-Instruct-Turbo",
+            # "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+            # "mistralai/Mistral-7B-Instruct-v0.2",
+            # "Qwen/QwQ-32B-Preview",
+            # "google/gemma-2-27b-it",
+            "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        ]
+    }
+    for provider, api_models in models.items():
+        for model in api_models:
+            run_token_benchmark(
+                llm_api=args.llm_api,
+                model=model,
+                test_timeout_s=args.timeout,
+                max_num_completed_requests=args.max_num_completed_requests,
+                mean_input_tokens=args.mean_input_tokens,
+                stddev_input_tokens=args.stddev_input_tokens,
+                mean_output_tokens=args.mean_output_tokens,
+                stddev_output_tokens=args.stddev_output_tokens,
+                num_concurrent_requests=args.num_concurrent_requests,
+                additional_sampling_params=args.additional_sampling_params,
+                results_dir=args.results_dir,
+                user_metadata=user_metadata,
+                provider=provider
+            )

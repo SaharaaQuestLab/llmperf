@@ -13,7 +13,7 @@ class RequestConfig(BaseModel):
         llm_api: The name of the LLM API to send the request to.
         metadata: Additional metadata to attach to the request for logging or validation purposes.
     """
-
+    provider: str = "together"
     model: str
     prompt: Tuple[str, int]
     sampling_params: Optional[Dict[str, Any]] = None

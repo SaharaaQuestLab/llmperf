@@ -1,0 +1,13 @@
+[
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.09670984907425009,
+        "ttft_s": 2.1776680829934776,
+        "end_to_end_latency_s": 9.199452624990954,
+        "request_output_throughput_token_per_s": 11.413722563749085,
+        "number_total_tokens": 293,
+        "number_output_tokens": 105,
+        "number_input_tokens": 188
+    }
+]

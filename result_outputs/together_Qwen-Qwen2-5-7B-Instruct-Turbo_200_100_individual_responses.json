@@ -1,0 +1,222 @@
+[
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.01304908831448034,
+        "ttft_s": 0.7719406249962049,
+        "end_to_end_latency_s": 1.3326924579887418,
+        "request_output_throughput_token_per_s": 93.79508321720836,
+        "number_total_tokens": 313,
+        "number_output_tokens": 125,
+        "number_input_tokens": 188
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.02781774211596416,
+        "ttft_s": 0.9037091670033988,
+        "end_to_end_latency_s": 1.202087625002605,
+        "request_output_throughput_token_per_s": 39.930533350175686,
+        "number_total_tokens": 180,
+        "number_output_tokens": 48,
+        "number_input_tokens": 132
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.01868037003984985,
+        "ttft_s": 0.8680573330057086,
+        "end_to_end_latency_s": 1.401149917001021,
+        "request_output_throughput_token_per_s": 61.37815729531055,
+        "number_total_tokens": 245,
+        "number_output_tokens": 86,
+        "number_input_tokens": 159
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.01553523161208197,
+        "ttft_s": 0.8116937909944681,
+        "end_to_end_latency_s": 1.4906077909981832,
+        "request_output_throughput_token_per_s": 79.16233949171934,
+        "number_total_tokens": 336,
+        "number_output_tokens": 118,
+        "number_input_tokens": 218
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.013890987117933533,
+        "ttft_s": 0.8008922500011977,
+        "end_to_end_latency_s": 1.5915388749999693,
+        "request_output_throughput_token_per_s": 87.96517772775277,
+        "number_total_tokens": 391,
+        "number_output_tokens": 140,
+        "number_input_tokens": 251
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.025108715096834086,
+        "ttft_s": 1.0626513339957455,
+        "end_to_end_latency_s": 1.590044124997803,
+        "request_output_throughput_token_per_s": 44.0239354993351,
+        "number_total_tokens": 251,
+        "number_output_tokens": 70,
+        "number_input_tokens": 181
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.02259366913462308,
+        "ttft_s": 1.0109197500132723,
+        "end_to_end_latency_s": 1.5539991670084419,
+        "request_output_throughput_token_per_s": 48.26257413276501,
+        "number_total_tokens": 208,
+        "number_output_tokens": 75,
+        "number_input_tokens": 133
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.022209474476577312,
+        "ttft_s": 1.0109151249926072,
+        "end_to_end_latency_s": 1.5227599999925587,
+        "request_output_throughput_token_per_s": 50.56607738604657,
+        "number_total_tokens": 199,
+        "number_output_tokens": 77,
+        "number_input_tokens": 122
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.0182789796790097,
+        "ttft_s": 1.0292807079968043,
+        "end_to_end_latency_s": 1.5570119159965543,
+        "request_output_throughput_token_per_s": 58.44528167387602,
+        "number_total_tokens": 326,
+        "number_output_tokens": 91,
+        "number_input_tokens": 235
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.02014404215005925,
+        "ttft_s": 0.9313283749943366,
+        "end_to_end_latency_s": 1.694874416993116,
+        "request_output_throughput_token_per_s": 55.461336283997845,
+        "number_total_tokens": 304,
+        "number_output_tokens": 94,
+        "number_input_tokens": 210
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.01889388809855597,
+        "ttft_s": 1.0510730000096373,
+        "end_to_end_latency_s": 1.7842893330089282,
+        "request_output_throughput_token_per_s": 61.088747202332,
+        "number_total_tokens": 340,
+        "number_output_tokens": 109,
+        "number_input_tokens": 231
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.01838374055918276,
+        "ttft_s": 1.0827611249987967,
+        "end_to_end_latency_s": 1.709962708002422,
+        "request_output_throughput_token_per_s": 66.08331250218116,
+        "number_total_tokens": 730,
+        "number_output_tokens": 113,
+        "number_input_tokens": 617
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.014914622166685933,
+        "ttft_s": 0.9368467500025872,
+        "end_to_end_latency_s": 1.5351026249991264,
+        "request_output_throughput_token_per_s": 75.56498054979615,
+        "number_total_tokens": 304,
+        "number_output_tokens": 116,
+        "number_input_tokens": 188
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.025809803120300158,
+        "ttft_s": 1.0419597909931326,
+        "end_to_end_latency_s": 1.5551253750018077,
+        "request_output_throughput_token_per_s": 41.15423812689418,
+        "number_total_tokens": 189,
+        "number_output_tokens": 64,
+        "number_input_tokens": 125
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.023414289231447543,
+        "ttft_s": 1.1068773750012042,
+        "end_to_end_latency_s": 1.6157365000108257,
+        "request_output_throughput_token_per_s": 49.51302393643022,
+        "number_total_tokens": 203,
+        "number_output_tokens": 80,
+        "number_input_tokens": 123
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.02835429848786335,
+        "ttft_s": 0.9284598329977598,
+        "end_to_end_latency_s": 1.2193649580003694,
+        "request_output_throughput_token_per_s": 39.3647526813588,
+        "number_total_tokens": 180,
+        "number_output_tokens": 48,
+        "number_input_tokens": 132
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.019883122088665713,
+        "ttft_s": 1.0668889160006074,
+        "end_to_end_latency_s": 1.8197377499891445,
+        "request_output_throughput_token_per_s": 53.85391384037871,
+        "number_total_tokens": 128,
+        "number_output_tokens": 98,
+        "number_input_tokens": 30
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.017065908666700123,
+        "ttft_s": 1.1147174170037033,
+        "end_to_end_latency_s": 1.8102262089960277,
+        "request_output_throughput_token_per_s": 74.57631500920128,
+        "number_total_tokens": 481,
+        "number_output_tokens": 135,
+        "number_input_tokens": 346
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.018758290732188876,
+        "ttft_s": 1.0729127090016846,
+        "end_to_end_latency_s": 1.7891691669938155,
+        "request_output_throughput_token_per_s": 59.245375985381266,
+        "number_total_tokens": 402,
+        "number_output_tokens": 106,
+        "number_input_tokens": 296
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.018518435505283898,
+        "ttft_s": 0.963518832999398,
+        "end_to_end_latency_s": 1.8147040830081096,
+        "request_output_throughput_token_per_s": 58.41172728519524,
+        "number_total_tokens": 458,
+        "number_output_tokens": 106,
+        "number_input_tokens": 352
+    }
+]
