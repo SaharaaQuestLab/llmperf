@@ -41,6 +41,8 @@ To run the most basic load test you can the token_benchmark_ray script.
 - --header to pass additional headers to the LLM API.
 - --request-timeout to pass a request timeout to the LLM API.
 - --system-prompt-file to pass a system prompt file to the LLM API.
+- --provider to specify the LLM provider name. 
+
 
 ### OpenAI Compatible APIs
 ```bash
@@ -61,6 +63,7 @@ python token_benchmark_ray.py \
 --additional-sampling-params '{}'
 
 ```
+
 
 ### Lepton APIs/Together APIs
 ```bash

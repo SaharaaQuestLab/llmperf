@@ -1,0 +1,24 @@
+[
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.03830426303680345,
+        "ttft_s": 1.6001851669989264,
+        "end_to_end_latency_s": 6.244432166999104,
+        "request_output_throughput_token_per_s": 26.103254169599403,
+        "number_total_tokens": 744,
+        "number_output_tokens": 163,
+        "number_input_tokens": 581
+    },
+    {
+        "error_code": null,
+        "error_msg": "",
+        "inter_token_latency_s": 0.041574951149424576,
+        "ttft_s": 2.1412001669996243,
+        "end_to_end_latency_s": 7.234504374999233,
+        "request_output_throughput_token_per_s": 24.05140573296266,
+        "number_total_tokens": 712,
+        "number_output_tokens": 174,
+        "number_input_tokens": 538
+    }
+]

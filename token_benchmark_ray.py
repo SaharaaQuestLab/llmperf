@@ -302,7 +302,8 @@ def run_token_benchmark(
     user_metadata: Dict[str, Any],
     additional_headers: Dict[str, Any],
     system_prompt_file: str,
-    request_timeout: int
+    request_timeout: int,
+    provider: str
 ):
     """
     Args:
@@ -357,11 +358,15 @@ def run_token_benchmark(
         summary.update(user_metadata)
 
         results = LLMPerfResults(name=summary_filename, metadata=summary)
-        results_dir = Path(results_dir)
-        if not results_dir.exists():
-            results_dir.mkdir(parents=True)
-        elif not results_dir.is_dir():
-            raise ValueError(f"{results_dir} is not a directory")
+
+        if provider:
+            model = model.replace('/', '-')
+            # results_dir_str = results_dir + '/' + model + '/' + provider
+            results_dir = Path(f"{results_dir}/{model}/{provider}")
+            if not results_dir.exists():
+                results_dir.mkdir(parents=True)
+            elif not results_dir.is_dir():
+                raise ValueError(f"{results_dir} is not a directory")
 
         try:
             with open(results_dir / f"{summary_filename}.json", "w") as f:
@@ -504,6 +509,13 @@ args.add_argument(
         "Time out for each request to the llm api. "
     ),
 )
+args.add_argument(
+    "--provider",
+    type=str,
+    default=None,  # 
+    help="Provider to use for the benchmark"
+)
+
 if __name__ == "__main__":
     env_vars = dict(os.environ)
     ray.init(runtime_env={"env_vars": env_vars}, object_store_memory=78643200)  # 1 GB
@@ -538,5 +550,6 @@ if __name__ == "__main__":
         user_metadata=user_metadata,
         additional_headers=additional_headers,
         system_prompt_file=args.system_prompt_file,
-        request_timeout=args.request_timeout
+        request_timeout=args.request_timeout,
+        provider=args.provider
     )
